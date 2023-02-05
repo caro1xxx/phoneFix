@@ -1,16 +1,9 @@
 import React from "react";
 import styled from "styled-components";
 import Upload from "./Upload";
-import {
-  Divider,
-  Button,
-  Dropdown,
-  DatePicker,
-  Input,
-  InputNumber,
-  Cascader,
-} from "antd";
+import { Divider, Button, Dropdown, DatePicker, Input, Cascader } from "antd";
 import type { MenuProps, DatePickerProps } from "antd";
+import { useNavigate } from "react-router-dom";
 
 const items: MenuProps["items"] = [
   {
@@ -190,6 +183,8 @@ const onSeriesChange = (
 };
 
 const Main = (props: Props) => {
+  let navigate = useNavigate();
+
   return (
     <Wrap>
       <FixOrder>
@@ -197,7 +192,11 @@ const Main = (props: Props) => {
           概括
         </Divider>
         <Overview>
-          <div>
+          <div
+            onClick={() => {
+              navigate("/waitfix");
+            }}
+          >
             <div className="num">9</div>
             <div className="logo">
               <svg

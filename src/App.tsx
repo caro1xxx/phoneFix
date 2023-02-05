@@ -1,10 +1,13 @@
 import React from "react";
 import "./App.css";
+import "antd/dist/reset.css";
+import { Route, Routes } from "react-router-dom";
 import styled from "styled-components";
 import NavBar from "./components/NavBar";
 import Main from "./components/Main";
 import State from "./components/State";
-import "antd/dist/reset.css";
+import WaitFix from "./page/WaitFix";
+
 const Wrap = styled.div`
   display: grid;
   grid-template-columns: repeat(10, 1fr);
@@ -27,7 +30,10 @@ function App() {
           <NavBar></NavBar>
         </Span2>
         <Span5>
-          <Main></Main>
+          <Routes>
+            <Route path="/home" element={<Main />} />
+            <Route path="/waitfix" element={<WaitFix />} />
+          </Routes>
         </Span5>
         <Span3>
           <State></State>
