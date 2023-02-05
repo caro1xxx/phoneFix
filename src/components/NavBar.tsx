@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 const NavBarWrap = styled.div`
   background-color: white;
   height: calc(100vh);
@@ -67,13 +67,15 @@ const NavBar = (props: Props) => {
 
   // 渲染子菜单列表
   const [subMenu, setSubMenu] = useState([
-    "全部订单",
-    "维修中",
-    "库存",
-    "型号管理",
-    "故障管理",
-    "售后订单",
+    { title: "全部订单", path: "allorder" },
+    { title: "维修中", path: "waitfix" },
+    { title: "库存", path: "warehouse" },
+    { title: "品牌型号管理", path: "brand" },
+    { title: "故障管理", path: "failure" },
+    { title: "售后订单", path: "aftersales" },
   ]);
+
+  const navigate = useNavigate();
 
   const changeBarColor = (index: number) => {
     let old = [...navColor];
@@ -85,6 +87,11 @@ const NavBar = (props: Props) => {
       }
     });
     setnavColor(old);
+  };
+
+  // 点击快捷方式
+  const quickBtn = (value: string) => {
+    navigate(value);
   };
 
   useEffect(() => {
@@ -316,7 +323,11 @@ const NavBar = (props: Props) => {
           <Title>快捷方式</Title>
           {subMenu.map((item) => {
             return (
-              <SubItem>
+              <SubItem
+                onClick={() => {
+                  quickBtn(item.path);
+                }}
+              >
                 {Math.ceil(Math.random() * 10) % 2 == 1 ? (
                   <svg
                     className="icon"
@@ -350,7 +361,7 @@ const NavBar = (props: Props) => {
                     ></path>
                   </svg>
                 )}
-                &nbsp;{item}
+                &nbsp;{item.title}
               </SubItem>
             );
           })}

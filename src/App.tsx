@@ -7,6 +7,7 @@ import NavBar from "./components/NavBar";
 import Main from "./components/Main";
 import State from "./components/State";
 import WaitFix from "./page/WaitFix";
+import BrandManage from "./page/BrandManage";
 
 const Wrap = styled.div`
   display: grid;
@@ -33,6 +34,7 @@ function App() {
           <Routes>
             <Route path="/home" element={<Main />} />
             <Route path="/waitfix" element={<WaitFix />} />
+            <Route path="/brand" element={<BrandManage />} />
           </Routes>
         </Span5>
         <Span3>
