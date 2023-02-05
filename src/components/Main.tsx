@@ -310,10 +310,6 @@ const Main = (props: Props) => {
         <MoreInfo>
           <div className="title">更多信息</div>
           <span className="itmes">
-            预付费:
-            <InputNumber min={0} max={10} defaultValue={3} />
-          </span>
-          <span className="itmes">
             付款方式:
             <Dropdown menu={{ items }} placement="bottomLeft">
               <Button>选择付款方式</Button>
@@ -353,13 +349,19 @@ const Main = (props: Props) => {
           style={{
             width: "40%",
             marginLeft: "10px",
-            marginTop: "35px",
-            height: "40px",
+            marginTop: "5px",
+            height: "30px",
           }}
         >
           保存
         </Button>
       </Fixbilling>
+      <Divider
+        orientation="right"
+        style={{ fontSize: "15px", fontWeight: "700" }}
+      >
+        销售
+      </Divider>
     </Wrap>
   );
 };

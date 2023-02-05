@@ -66,7 +66,14 @@ const NavBar = (props: Props) => {
   ]);
 
   // 渲染子菜单列表
-  const [subMenu, setSubMenu] = useState(["总计订单", "维修中"]);
+  const [subMenu, setSubMenu] = useState([
+    "全部订单",
+    "维修中",
+    "库存",
+    "型号管理",
+    "故障管理",
+    "售后订单",
+  ]);
 
   const changeBarColor = (index: number) => {
     let old = [...navColor];
