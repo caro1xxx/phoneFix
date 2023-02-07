@@ -1,9 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import Upload from "./Upload";
-import { Divider, Button, Dropdown, DatePicker, Input, Cascader } from "antd";
+import {
+  Divider,
+  Button,
+  Dropdown,
+  DatePicker,
+  Input,
+  Cascader,
+  Select,
+} from "antd";
 import type { MenuProps, DatePickerProps } from "antd";
 import { useNavigate } from "react-router-dom";
+import { HOST } from "../ENV";
 
 const items: MenuProps["items"] = [
   {
@@ -170,6 +179,26 @@ interface Option {
   children?: Option[];
 }
 
+type brand = {
+  model: string;
+  pk: number;
+  fields: {
+    name: string;
+    state: string;
+  };
+};
+
+type UserList = {
+  model: string;
+  pk: number;
+  fields: {
+    name: string;
+    create: string;
+    mask: string;
+    tel: string;
+  };
+};
+
 const { TextArea } = Input;
 
 const onChange: DatePickerProps["onChange"] = (date, dateString) => {
@@ -184,6 +213,97 @@ const onSeriesChange = (
 
 const Main = (props: Props) => {
   let navigate = useNavigate();
+
+  const [info, setInfo] = useState({
+    brand: [{ value: "", label: "", disabled: false }],
+    model: [{ value: "", label: "", disabled: false }],
+    currentSelectBrand: "",
+    currentSelectModel: "",
+    userList: [{ value: "", label: "", disabled: false }],
+  });
+
+  // 选择品牌
+  const handleBrandChange = (value: string) => {
+    let old = { ...info };
+    old.currentSelectBrand = value;
+    setInfo(old);
+  };
+
+  // 选择型号
+  const handleModelChange = (value: string) => {
+    let old = { ...info };
+    old.currentSelectModel = value;
+    setInfo(old);
+  };
+
+  // 请求品牌
+  const onSelectBrand = () => {
+    if (info.brand[0].value !== "") return;
+    fetch(`${HOST}/api/v1/get_brand/`)
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        let old = { ...info };
+        let result: brand[] = JSON.parse(data.list);
+        if (old.brand[0].value === "") old.brand = [];
+        result.forEach((item) => {
+          old.brand.push({
+            value: item.fields.name,
+            label: item.fields.name,
+            disabled: item.fields.state === "1" ? false : true,
+          });
+        });
+        setInfo(old);
+      });
+  };
+
+  // 请求型号
+  const onSelectModel = () => {
+    if (info.currentSelectBrand === "") return;
+    fetch(`${HOST}/api/v1/get_brand/`, {
+      method: "post",
+      body: JSON.stringify({ brand: info.currentSelectBrand }),
+      headers: { "Content-Type": "applicat ion/json" },
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        let old = { ...info };
+        let result: brand[] = JSON.parse(data.list);
+        old.model = [];
+        result.forEach((item) => {
+          old.model.push({
+            value: item.fields.name,
+            label: item.fields.name,
+            disabled: item.fields.state === "1" ? false : true,
+          });
+        });
+        setInfo(old);
+      });
+  };
+
+  // 获取用户列表
+  const getUserlist = () => {
+    fetch(`${HOST}/api/v1/user/`)
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        let result: UserList[] = JSON.parse(data.list);
+        let old = { ...info };
+        old.userList = [];
+        result.forEach((item) => {
+          old.userList.push({
+            value: `${item.fields.name}|${item.fields.tel}`,
+            label: `${item.fields.name}|${item.fields.tel}`,
+            disabled: false,
+          });
+        });
+        setInfo(old);
+      });
+  };
 
   return (
     <Wrap>
@@ -269,25 +389,37 @@ const Main = (props: Props) => {
           <div className="title">基础信息</div>
           <span className="itmes">
             客户:
-            <Dropdown menu={{ items }} placement="bottomLeft">
-              <Button>匿名用户</Button>
-            </Dropdown>
+            <Select
+              defaultValue="请选择用户"
+              style={{ width: 120 }}
+              onChange={handleModelChange}
+              onClick={getUserlist}
+              options={info.userList}
+            />
           </span>
           <span className="itmes">
             送修日期:
-            <DatePicker onChange={onChange} />
+            <DatePicker onChange={onChange} style={{ width: "100px" }} />
           </span>
           <span className="itmes">
             品牌:
-            <Dropdown menu={{ items }} placement="bottomLeft">
-              <Button>请选择品牌</Button>
-            </Dropdown>
+            <Select
+              defaultValue="请选择品牌"
+              style={{ width: 120 }}
+              onChange={handleBrandChange}
+              onClick={onSelectBrand}
+              options={info.brand}
+            />
           </span>
           <span className="itmes">
             型号:
-            <Dropdown menu={{ items }} placement="bottomLeft">
-              <Button>请选择型号</Button>
-            </Dropdown>
+            <Select
+              defaultValue="请选择型号"
+              style={{ width: 120 }}
+              onChange={handleModelChange}
+              onClick={onSelectModel}
+              options={info.model}
+            />
           </span>
           <span className="itmes">
             序列号:
@@ -359,8 +491,14 @@ const Main = (props: Props) => {
         orientation="right"
         style={{ fontSize: "15px", fontWeight: "700" }}
       >
-        销售
+        备忘录
       </Divider>
+      <div style={{ padding: "0px 10px" }}>
+        <TextArea
+          placeholder="Controlled autosize"
+          autoSize={{ minRows: 3, maxRows: 5 }}
+        />
+      </div>
     </Wrap>
   );
 };
