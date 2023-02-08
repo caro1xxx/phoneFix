@@ -1,91 +1,10 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import styled from "styled-components";
 import Upload from "./Upload";
-import {
-  Divider,
-  Button,
-  Dropdown,
-  DatePicker,
-  Input,
-  Cascader,
-  Select,
-} from "antd";
-import type { MenuProps, DatePickerProps } from "antd";
+import { Divider, Button, DatePicker, Input, Select } from "antd";
+import type { DatePickerProps } from "antd";
 import { useNavigate } from "react-router-dom";
 import { HOST } from "../ENV";
-
-const items: MenuProps["items"] = [
-  {
-    key: "1",
-    label: (
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://www.antgroup.com"
-      >
-        1st menu item
-      </a>
-    ),
-  },
-  {
-    key: "2",
-    label: (
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://www.aliyun.com"
-      >
-        2nd menu item
-      </a>
-    ),
-  },
-  {
-    key: "3",
-    label: (
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://www.luohanacademy.com"
-      >
-        3rd menu item
-      </a>
-    ),
-  },
-];
-const options: Option[] = [
-  {
-    value: "zhejiang",
-    label: "Zhejiang",
-    children: [
-      {
-        value: "hangzhou",
-        label: "Hangzhou",
-        children: [
-          {
-            value: "xihu",
-            label: "West Lake",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    value: "jiangsu",
-    label: "Jiangsu",
-    children: [
-      {
-        value: "nanjing",
-        label: "Nanjing",
-        children: [
-          {
-            value: "zhonghuamen",
-            label: "Zhong Hua Men",
-          },
-        ],
-      },
-    ],
-  },
-];
 
 const Wrap = styled.div`
   background-color: white;
@@ -201,26 +120,46 @@ type UserList = {
 
 const { TextArea } = Input;
 
-const onChange: DatePickerProps["onChange"] = (date, dateString) => {
-  console.log(date, dateString);
-};
-
-const onSeriesChange = (
-  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-) => {
-  console.log("Change:", e.target.value);
-};
-
 const Main = (props: Props) => {
   let navigate = useNavigate();
 
   const [info, setInfo] = useState({
     brand: [{ value: "", label: "", disabled: false }],
     model: [{ value: "", label: "", disabled: false }],
+    userList: [{ value: "", label: "", disabled: false }],
+    payWay: [
+      { value: "挂账", label: "挂账", disabled: false },
+      { value: "现金", label: "现金", disabled: false },
+      { value: "微信", label: "微信", disabled: false },
+      { value: "支付宝", label: "支付宝", disabled: false },
+      { value: "微信扫码", label: "微信扫码", disabled: false },
+      { value: "支付宝扫码", label: "支付宝扫码", disabled: false },
+    ],
+    checker: [
+      { value: "周渝", label: "周渝", disabled: false },
+      { value: "刘毅", label: "刘毅", disabled: false },
+      { value: "喻小娟", label: "喻小娟", disabled: false },
+      { value: "唐洁", label: "唐洁", disabled: false },
+    ],
+    fixWay: [
+      { value: "上门", label: "上门", disabled: false },
+      { value: "寄修", label: "寄修", disabled: false },
+      { value: "到店", label: "到店", disabled: false },
+    ],
     currentSelectBrand: "",
     currentSelectModel: "",
-    userList: [{ value: "", label: "", disabled: false }],
+    currentSelectUser: "",
+    currentSelectDate: "",
+    currentSeries: "",
+    currentPassword: "",
+    currentMask: "",
+    currentPayWay: "",
+    openOrder: "",
+    currentChecker: "",
+    currentFixWay: "",
   });
+
+  const flag = useRef("");
 
   // 选择品牌
   const handleBrandChange = (value: string) => {
@@ -234,6 +173,109 @@ const Main = (props: Props) => {
     let old = { ...info };
     old.currentSelectModel = value;
     setInfo(old);
+  };
+
+  // 选择用户
+  const handleUserChange = (value: string) => {
+    let old = { ...info };
+    old.currentSelectUser = value;
+    setInfo(old);
+  };
+
+  // 选择时间
+  const onDateChange: DatePickerProps["onChange"] = (_, dateString) => {
+    let old = { ...info };
+    old.currentSelectDate = dateString;
+    setInfo(old);
+  };
+
+  // 输入序列号
+  const onSeriesChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    let old = { ...info };
+    old.currentSeries = e.target.value;
+    setInfo(old);
+  };
+
+  // 输入密码
+  const onPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let old = { ...info };
+    old.currentPassword = e.target.value;
+    setInfo(old);
+  };
+
+  // 输入备注
+  const onMaskChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    let old = { ...info };
+    old.currentMask = e.target.value;
+    setInfo(old);
+  };
+
+  // 选择支付
+  const onPayWayChange = (value: string) => {
+    let old = { ...info };
+    old.currentPayWay = value;
+    setInfo(old);
+  };
+
+  // 选择开单员
+  const onOpenOrderChange = (value: string) => {
+    let old = { ...info };
+    old.openOrder = value;
+    setInfo(old);
+  };
+
+  // 选择检测员
+  const onCheckerChange = (value: string) => {
+    let old = { ...info };
+    old.currentChecker = value;
+    setInfo(old);
+  };
+
+  // 选择服务方式
+  const onfixWayChange = (value: string) => {
+    let old = { ...info };
+    old.currentFixWay = value;
+    setInfo(old);
+  };
+
+  // 保存提交
+  const saveOrder = () => {
+    if (!info.currentSelectBrand) alert("请选择品牌");
+    else if (!info.currentSelectDate) alert("请选择时间");
+    else if (!info.currentSelectModel) alert("请选择型号");
+    else if (!info.currentSelectUser) alert("请选择用户");
+    else {
+      fetch(`${HOST}/api/v1/order/`, {
+        method: "post",
+        body: JSON.stringify({
+          key: "WX" + Date.now(),
+          brand: info.currentSelectBrand,
+          model: info.currentSelectModel,
+          user: info.currentSelectUser,
+          date: info.currentSelectDate,
+          series: info.currentSeries,
+          password: info.currentPassword,
+          mask: info.currentMask,
+          payway: info.currentPayWay,
+          open: info.openOrder,
+          checker: info.currentChecker,
+          fixway: info.currentFixWay,
+        }),
+        headers: { "Content-Type": "applicat ion/json" },
+      })
+        .then((res) => {
+          return res.json();
+        })
+        .then((data) => {
+          if (data.code === 200) {
+            alert("保存成功");
+          }
+        });
+    }
   };
 
   // 请求品牌
@@ -261,12 +303,14 @@ const Main = (props: Props) => {
   // 请求型号
   const onSelectModel = () => {
     if (info.currentSelectBrand === "") return;
+    if (flag.current === info.currentSelectBrand) return;
     fetch(`${HOST}/api/v1/get_brand/`, {
       method: "post",
       body: JSON.stringify({ brand: info.currentSelectBrand }),
       headers: { "Content-Type": "applicat ion/json" },
     })
       .then((res) => {
+        flag.current = info.currentSelectBrand;
         return res.json();
       })
       .then((data) => {
@@ -286,6 +330,7 @@ const Main = (props: Props) => {
 
   // 获取用户列表
   const getUserlist = () => {
+    if (info.userList[0].value !== "") return;
     fetch(`${HOST}/api/v1/user/`)
       .then((res) => {
         return res.json();
@@ -392,14 +437,14 @@ const Main = (props: Props) => {
             <Select
               defaultValue="请选择用户"
               style={{ width: 120 }}
-              onChange={handleModelChange}
+              onChange={handleUserChange}
               onClick={getUserlist}
               options={info.userList}
             />
           </span>
           <span className="itmes">
             送修日期:
-            <DatePicker onChange={onChange} style={{ width: "100px" }} />
+            <DatePicker onChange={onDateChange} style={{ width: "100px" }} />
           </span>
           <span className="itmes">
             品牌:
@@ -427,12 +472,13 @@ const Main = (props: Props) => {
           </span>
           <span className="itmes">
             密码:
-            <Input placeholder="密码" />
+            <Input placeholder="密码" onChange={onPasswordChange} />
           </span>
           <span className="itmes" style={{ width: "95%" }}>
             备注:
             <TextArea
               placeholder="备注"
+              onChange={onMaskChange}
               autoSize={{ minRows: 1, maxRows: 6 }}
             />
           </span>
@@ -442,31 +488,39 @@ const Main = (props: Props) => {
           <div className="title">更多信息</div>
           <span className="itmes">
             付款方式:
-            <Dropdown menu={{ items }} placement="bottomLeft">
-              <Button>选择付款方式</Button>
-            </Dropdown>
+            <Select
+              defaultValue="请选择付款方式"
+              style={{ width: 120 }}
+              onChange={onPayWayChange}
+              options={info.payWay}
+            />
           </span>
           <span className="itmes">
             开单员:
-            <Dropdown menu={{ items }} placement="bottomLeft">
-              <Button>选择开单员</Button>
-            </Dropdown>
+            <Select
+              defaultValue="请选择开单员"
+              style={{ width: 120 }}
+              onChange={onOpenOrderChange}
+              options={info.checker}
+            />
           </span>
           <span className="itmes">
             检查员:
-            <Dropdown menu={{ items }} placement="bottomLeft">
-              <Button>选择检测员</Button>
-            </Dropdown>
+            <Select
+              defaultValue="请选择检测员"
+              style={{ width: 120 }}
+              onChange={onCheckerChange}
+              options={info.checker}
+            />
           </span>
           <span className="itmes">
             服务方式:
-            <Dropdown menu={{ items }} placement="bottomLeft">
-              <Button>选择服务方式</Button>
-            </Dropdown>
-          </span>
-          <span className="itmes" style={{ width: "95%" }}>
-            地址:
-            <Cascader options={options} placeholder="Please select" />
+            <Select
+              defaultValue="请选择服务方式"
+              style={{ width: 120 }}
+              onChange={onfixWayChange}
+              options={info.fixWay}
+            />
           </span>
           <span className="itmes" style={{ width: "95%" }}>
             <Input placeholder="详细地址" />
@@ -477,8 +531,9 @@ const Main = (props: Props) => {
         </MoreInfo>
         <Button
           type="primary"
+          onClick={saveOrder}
           style={{
-            width: "40%",
+            width: "97%",
             marginLeft: "10px",
             marginTop: "5px",
             height: "30px",

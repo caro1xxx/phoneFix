@@ -1,7 +1,12 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import styled from "styled-components";
 import Back from "../components/Back";
 import { Divider, Input } from "antd";
+import { Space, Table } from "antd";
+import type { ColumnsType } from "antd/es/table";
+import { HOST } from "../ENV";
+import useSWR from "swr";
+import Popup from "../components/Popup";
 
 const Wrap = styled.div`
   background-color: white;
@@ -11,41 +16,50 @@ const Wrap = styled.div`
     font-weight: 700;
   }
   .list {
-    margin: 20px 0px;
-    font-size: 14px;
-    height: calc(100vh - 150px);
-    overflow: scroll;
-  }
-  .item {
-    border-bottom: 0.5px solid #b7b7b781;
-    padding: 20px 0px;
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-gap: 10px;
-    .span-col-2 {
-      grid-column: span 2 / auto;
-    }
-    .itemTitle {
-      color: #939393;
-      margin: 10px 0px;
-      font-size: 13px;
-    }
-    .itemContent {
-      font-size: 16px;
-      font-weight: 600;
-    }
-    .checkMore {
-      display: inline-flex;
-      vertical-align: top;
-      justify-content: center;
-      align-items: center;
-      color: #7d7d7d;
-      :hover {
-        text-decoration: underline;
-      }
-    }
+    margin-top: 20px;
   }
 `;
+
+type UserInfo = {
+  key: string;
+  brand: string;
+  model: string;
+  date: string;
+};
+
+type Result = {
+  pk: number;
+  model: string;
+  fields: {
+    key: string;
+    brand: string;
+    model: string;
+    mask: string;
+    date: string;
+    fixway: string;
+    open: string;
+    password: string;
+    series: string;
+    user: string;
+    checker: string;
+    payway: string;
+  };
+};
+
+type List = {
+  key: string;
+  brand: string;
+  model: string;
+  mask: string;
+  date: string;
+  fixway: string;
+  open: string;
+  password: string;
+  series: string;
+  user: string;
+  checker: string;
+  payway: string;
+};
 
 type Props = {};
 
@@ -53,71 +67,99 @@ const { Search } = Input;
 const onSearch = (value: string) => console.log(value);
 
 const WaitFix = (props: Props) => {
-  const [fixList, setFixList] = useState([
+  const [fixList, setFixList] = useState<List[]>([]);
+  const [popupProps, setPopupProps] = useState<{
+    data: List | null;
+    state: boolean;
+  }>({ data: null, state: false });
+
+  const changeClose = () => {
+    let old = { ...popupProps };
+    old.state = false;
+    setPopupProps(old);
+  };
+
+  const columns: ColumnsType<UserInfo> = [
     {
-      id: "WX282812937283",
-      brand: "苹果",
-      model: "12 pro max",
-      create: "2022/01/01",
+      title: "单号",
+      dataIndex: "key",
+      key: "key",
+      render: (text) => <a>{text}</a>,
     },
     {
-      id: "WX282812937283",
-      brand: "苹果",
-      model: "12 pro max",
-      create: "2022/01/01",
+      title: "品牌",
+      dataIndex: "brand",
+      key: "brand",
     },
     {
-      id: "WX282812937283",
-      brand: "苹果",
-      model: "12 pro max",
-      create: "2022/01/01",
+      title: "型号",
+      dataIndex: "model",
+      key: "model",
     },
     {
-      id: "WX282812937283",
-      brand: "苹果",
-      model: "12 pro max",
-      create: "2022/01/01",
+      title: "备注",
+      key: "mask",
+      dataIndex: "mask",
     },
     {
-      id: "WX282812937283",
-      brand: "苹果",
-      model: "12 pro max",
-      create: "2022/01/01",
+      title: "送修时间",
+      key: "date",
+      dataIndex: "date",
     },
     {
-      id: "WX282812937283",
-      brand: "苹果",
-      model: "12 pro max",
-      create: "2022/01/01",
+      title: "操作",
+      key: "action",
+      render: (_, record) => (
+        <Space size="middle">
+          <a
+            onClick={() => {
+              checkdetail(record);
+            }}
+          >
+            详情
+          </a>
+        </Space>
+      ),
     },
-    {
-      id: "WX282812937283",
-      brand: "苹果",
-      model: "12 pro max",
-      create: "2022/01/01",
-    },
-    {
-      id: "WX282812937283",
-      brand: "苹果",
-      model: "12 pro max",
-      create: "2022/01/01",
-    },
-    {
-      id: "WX282812937283",
-      brand: "苹果",
-      model: "12 pro max",
-      create: "2022/01/01",
-    },
-    {
-      id: "WX282812937283",
-      brand: "苹果",
-      model: "12 pro max",
-      create: "2022/01/01",
-    },
-  ]);
+  ];
+
+  const checkdetail = (record: UserInfo) => {
+    fixList.forEach((item) => {
+      if (item.key === record.key) {
+        setPopupProps({ data: item, state: true });
+      }
+    });
+  };
+
+  // fetcher
+  const fetcher = (url: string) =>
+    fetch(url)
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        let result: Result[] = JSON.parse(data.list);
+        let old = [...fixList];
+        result.forEach((item) => {
+          old.push({ ...item.fields });
+        });
+        setFixList(old);
+      });
+
+  // swr
+  const { error, isLoading } = useSWR(`${HOST}/api/v1/order/`, fetcher);
+
+  if (error) return <div>error</div>;
+  if (isLoading) return <div>isLoading</div>;
+  if (!fixList) return <div>error1</div>;
 
   return (
     <Wrap>
+      {popupProps.state ? (
+        <Popup data={popupProps.data} change={changeClose}></Popup>
+      ) : (
+        <></>
+      )}
       <Divider className="title">待维修订单</Divider>
       <Back></Back>
       <Search
@@ -126,69 +168,7 @@ const WaitFix = (props: Props) => {
         style={{ width: 300, float: "right" }}
       />
       <div className="list">
-        {fixList.map((item) => {
-          return (
-            <div className="item">
-              <div className="span-col-2">
-                <div className="itemTitle">维修单号</div>
-                <div className="itemContent" style={{ position: "relative" }}>
-                  {item.id}
-                  <svg
-                    style={{ position: "absolute", marginLeft: "10px" }}
-                    viewBox="0 0 1024 1024"
-                    version="1.1"
-                    xmlns="http://www.w3.org/2000/svg"
-                    p-id="11445"
-                    width="20"
-                    height="20"
-                  >
-                    <path
-                      d="M768 256a85.333333 85.333333 0 0 1 85.333333 85.333333v512a85.333333 85.333333 0 0 1-85.333333 85.333334h-341.333333a85.333333 85.333333 0 0 1-85.333334-85.333334V341.333333a85.333333 85.333333 0 0 1 85.333334-85.333333h341.333333z m0 85.333333h-341.333333v512h341.333333V341.333333z m-128-256a42.666667 42.666667 0 0 1 42.666667 42.666667l-0.042667 42.666667H256l-0.042667 597.333333H213.333333a42.666667 42.666667 0 0 1-42.666666-42.666667V170.666667a85.333333 85.333333 0 0 1 85.333333-85.333334h384z"
-                      fill="#000000"
-                      p-id="11446"
-                    ></path>
-                  </svg>
-                </div>
-              </div>
-              <div
-                style={{
-                  textAlign: "center",
-                  borderLeft: "0.5px solid #b7b7b781",
-                }}
-              >
-                <div className="itemTitle">品牌</div>
-                <div className="itemContent">{item.brand}</div>
-              </div>
-              <div
-                style={{
-                  textAlign: "center",
-                  borderLeft: "0.5px solid #b7b7b781",
-                }}
-              >
-                <div className="itemTitle">型号</div>
-                <div className="itemContent">{item.model}</div>
-              </div>
-              <div
-                style={{
-                  textAlign: "center",
-                  borderLeft: "0.5px solid #b7b7b781",
-                }}
-              >
-                <div className="itemTitle">送修时间</div>
-                <div className="itemContent">{item.create}</div>
-              </div>
-              <div
-                className="checkMore"
-                style={{
-                  textAlign: "center",
-                  borderLeft: "0.5px solid #b7b7b781",
-                }}
-              >
-                详情
-              </div>
-            </div>
-          );
-        })}
+        <Table columns={columns} dataSource={fixList} />
       </div>
     </Wrap>
   );

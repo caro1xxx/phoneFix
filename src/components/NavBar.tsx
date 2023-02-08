@@ -68,7 +68,7 @@ const NavBar = (props: Props) => {
   // 渲染子菜单列表
   const [subMenu, setSubMenu] = useState([
     { title: "全部订单", path: "allorder" },
-    { title: "维修中", path: "waitfix" },
+    { title: "待维修", path: "waitfix" },
     { title: "库存", path: "warehouse" },
     { title: "品牌型号管理", path: "brand" },
     { title: "故障管理", path: "failure" },
