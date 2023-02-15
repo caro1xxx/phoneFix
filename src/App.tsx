@@ -9,6 +9,7 @@ import State from "./components/State";
 import WaitFix from "./page/WaitFix";
 import BrandManage from "./page/BrandManage";
 import User from "./page/User";
+import Fixing from "./page/Fixing";
 
 const Wrap = styled.div`
   display: grid;
@@ -35,6 +36,7 @@ function App() {
           <Routes>
             <Route path="/home" element={<Main />} />
             <Route path="/waitfix" element={<WaitFix />} />
+            <Route path="/fixing" element={<Fixing />} />
             <Route path="/brand" element={<BrandManage />} />
             <Route path="/user" element={<User />} />
           </Routes>

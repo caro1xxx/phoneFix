@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import { nanoid } from "nanoid";
 const Wrap = styled.div`
   background-color: #fafafa;
   height: calc(100vh);
@@ -40,7 +41,7 @@ const State = (props: Props) => {
         <Title>近期订单</Title>
         {recentOrder.map((item) => {
           return (
-            <OrderItem>
+            <OrderItem key={nanoid()}>
               &nbsp;&nbsp;{item.id}
               <span>{item.state}</span>
             </OrderItem>

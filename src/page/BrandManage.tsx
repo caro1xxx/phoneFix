@@ -4,6 +4,7 @@ import Back from "../components/Back";
 import { Divider, Collapse, theme, Switch, Input } from "antd";
 import { HOST } from "../ENV";
 import useSWR from "swr";
+import { nanoid } from "nanoid";
 import {
   CaretRightOutlined,
   DeleteOutlined,
@@ -287,6 +288,7 @@ const BrandManage = (props: Props) => {
       {brandList.map((item, index) => {
         return (
           <Collapse
+            key={nanoid()}
             onChange={() => {
               onCollapseChange(item.pk);
             }}
@@ -361,7 +363,7 @@ const BrandManage = (props: Props) => {
                 ) : (
                   item.child?.map((item, index) => {
                     return (
-                      <p>
+                      <p key={nanoid()}>
                         <HeadNum>#{index}</HeadNum>
                         <span id="brandEdit">{item.fields.name}</span>
                         <DeleteOutlined

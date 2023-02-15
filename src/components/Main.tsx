@@ -55,13 +55,17 @@ const Fixbilling = styled.div`
   .fields {
     font-size: 13px;
   }
+  .girdBody {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-gap: 10px;
+    margin: 0px 10px;
+  }
 `;
 const BaseInfo = styled.div`
   font-size: 12px;
   background-color: #f7f6fc;
-  width: 40%;
-  display: inline-block;
-  margin: 5px 10px;
+  /* margin: 5px 10px; */
   padding: 10px;
   .title {
     font-weight: 700;
@@ -75,10 +79,7 @@ const BaseInfo = styled.div`
 const MoreInfo = styled.div`
   font-size: 12px;
   background-color: #f7f6fc;
-  float: right;
-  width: 55%;
-  display: inline-block;
-  margin: 5px 10px;
+  /* margin: 5px 10px; */
   padding: 10px;
   .title {
     font-weight: 700;
@@ -357,6 +358,7 @@ const Main = (props: Props) => {
           概括
         </Divider>
         <Overview>
+          {/* 等待维修 */}
           <div
             onClick={() => {
               navigate("/waitfix");
@@ -382,7 +384,12 @@ const Main = (props: Props) => {
             </div>
             <div className="discription">待维修</div>
           </div>
-          <div>
+          {/* 维修中 */}
+          <div
+            onClick={() => {
+              navigate("/fixing");
+            }}
+          >
             <div className="num">25</div>
             <div className="logo">
               <svg
@@ -403,6 +410,7 @@ const Main = (props: Props) => {
             </div>
             <div className="discription">维修中</div>
           </div>
+          {/* 售后 */}
           <div>
             <div className="num">128</div>
             <div className="logo">
@@ -430,117 +438,120 @@ const Main = (props: Props) => {
         <Divider orientation="left" className="title">
           维修开单
         </Divider>
-        <BaseInfo>
-          <div className="title">基础信息</div>
-          <span className="itmes">
-            客户:
-            <Select
-              defaultValue="请选择用户"
-              style={{ width: 120 }}
-              onChange={handleUserChange}
-              onClick={getUserlist}
-              options={info.userList}
-            />
-          </span>
-          <span className="itmes">
-            送修日期:
-            <DatePicker onChange={onDateChange} style={{ width: "100px" }} />
-          </span>
-          <span className="itmes">
-            品牌:
-            <Select
-              defaultValue="请选择品牌"
-              style={{ width: 120 }}
-              onChange={handleBrandChange}
-              onClick={onSelectBrand}
-              options={info.brand}
-            />
-          </span>
-          <span className="itmes">
-            型号:
-            <Select
-              defaultValue="请选择型号"
-              style={{ width: 120 }}
-              onChange={handleModelChange}
-              onClick={onSelectModel}
-              options={info.model}
-            />
-          </span>
-          <span className="itmes">
-            序列号:
-            <Input showCount maxLength={20} onChange={onSeriesChange} />
-          </span>
-          <span className="itmes">
-            密码:
-            <Input placeholder="密码" onChange={onPasswordChange} />
-          </span>
-          <span className="itmes" style={{ width: "95%" }}>
-            备注:
-            <TextArea
-              placeholder="备注"
-              onChange={onMaskChange}
-              autoSize={{ minRows: 1, maxRows: 6 }}
-            />
-          </span>
-        </BaseInfo>
+        <div className="girdBody">
+          <BaseInfo style={{ gridColumn: "span 3 / auto" }}>
+            <div className="title">基础信息</div>
+            <span className="itmes">
+              客户:
+              <Select
+                defaultValue="请选择用户"
+                style={{ width: 120 }}
+                onChange={handleUserChange}
+                onClick={getUserlist}
+                options={info.userList}
+              />
+            </span>
+            <span className="itmes">
+              送修日期:
+              <DatePicker onChange={onDateChange} style={{ width: "100px" }} />
+            </span>
+            <span className="itmes">
+              品牌:
+              <Select
+                defaultValue="请选择品牌"
+                style={{ width: 120 }}
+                onChange={handleBrandChange}
+                onClick={onSelectBrand}
+                options={info.brand}
+              />
+            </span>
+            <span className="itmes">
+              型号:
+              <Select
+                defaultValue="请选择型号"
+                style={{ width: 120 }}
+                onChange={handleModelChange}
+                onClick={onSelectModel}
+                options={info.model}
+              />
+            </span>
+            <span className="itmes">
+              序列号:
+              <Input showCount maxLength={20} onChange={onSeriesChange} />
+            </span>
+            <span className="itmes">
+              密码:
+              <Input placeholder="密码" onChange={onPasswordChange} />
+            </span>
+            <span className="itmes" style={{ width: "95%" }}>
+              备注:
+              <TextArea
+                placeholder="备注"
+                onChange={onMaskChange}
+                autoSize={{ minRows: 1, maxRows: 6 }}
+              />
+            </span>
+          </BaseInfo>
 
-        <MoreInfo>
-          <div className="title">更多信息</div>
-          <span className="itmes">
-            付款方式:
-            <Select
-              defaultValue="请选择付款方式"
-              style={{ width: 120 }}
-              onChange={onPayWayChange}
-              options={info.payWay}
-            />
-          </span>
-          <span className="itmes">
-            开单员:
-            <Select
-              defaultValue="请选择开单员"
-              style={{ width: 120 }}
-              onChange={onOpenOrderChange}
-              options={info.checker}
-            />
-          </span>
-          <span className="itmes">
-            检查员:
-            <Select
-              defaultValue="请选择检测员"
-              style={{ width: 120 }}
-              onChange={onCheckerChange}
-              options={info.checker}
-            />
-          </span>
-          <span className="itmes">
-            服务方式:
-            <Select
-              defaultValue="请选择服务方式"
-              style={{ width: 120 }}
-              onChange={onfixWayChange}
-              options={info.fixWay}
-            />
-          </span>
-          <span className="itmes" style={{ width: "95%" }}>
-            <Input placeholder="详细地址" />
-          </span>
-          <span className="itmes" style={{ width: "95%" }}>
-            <Upload></Upload>
-          </span>
-        </MoreInfo>
-        <Button
-          type="primary"
-          onClick={saveOrder}
-          style={{
-            width: "97%",
-            marginLeft: "10px",
-            marginTop: "5px",
-            height: "30px",
-          }}
-        >
-          保存
-        </Button>
+          <div style={{ gridColumn: "span 4 / auto" }}>
+            <MoreInfo>
+              <div className="title">更多信息</div>
+              <span className="itmes">
+                付款方式:
+                <Select
+                  defaultValue="请选择付款方式"
+                  style={{ width: 120 }}
+                  onChange={onPayWayChange}
+                  options={info.payWay}
+                />
+              </span>
+              <span className="itmes">
+                开单员:
+                <Select
+                  defaultValue="请选择开单员"
+                  style={{ width: 120 }}
+                  onChange={onOpenOrderChange}
+                  options={info.checker}
+                />
+              </span>
+              <span className="itmes">
+                检查员:
+                <Select
+                  defaultValue="请选择检测员"
+                  style={{ width: 120 }}
+                  onChange={onCheckerChange}
+                  options={info.checker}
+                />
+              </span>
+              <span className="itmes">
+                服务方式:
+                <Select
+                  defaultValue="请选择服务方式"
+                  style={{ width: 120 }}
+                  onChange={onfixWayChange}
+                  options={info.fixWay}
+                />
+              </span>
+              <span className="itmes" style={{ width: "95%" }}>
+                <Input placeholder="详细地址" />
+              </span>
+              <span className="itmes" style={{ width: "95%" }}>
+                <Upload></Upload>
+              </span>
+            </MoreInfo>
+            <Button
+              type="primary"
+              onClick={saveOrder}
+              style={{
+                width: "100%",
+                marginTop: "5px",
+                height: "30px",
+              }}
+            >
+              保存
+            </Button>
+          </div>
+        </div>
       </Fixbilling>
       <Divider
         orientation="right"

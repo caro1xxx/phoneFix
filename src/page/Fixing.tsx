@@ -7,7 +7,7 @@ import type { ColumnsType } from "antd/es/table";
 import { HOST } from "../ENV";
 import useSWR from "swr";
 import Popup from "../components/Popup";
-import { nanoid } from "nanoid";
+import FaultQuotation from "../components/FaultQuotation";
 
 const Wrap = styled.div`
   background-color: white;
@@ -67,12 +67,17 @@ type Props = {};
 const { Search } = Input;
 const onSearch = (value: string) => console.log(value);
 
-const WaitFix = (props: Props) => {
+const Fixing = (props: Props) => {
   const [fixList, setFixList] = useState<List[]>([]);
   const [popupProps, setPopupProps] = useState<{
     data: List | null;
     state: boolean;
   }>({ data: null, state: false });
+
+  const [Fault, setFault] = useState<{
+    state: boolean;
+    key: string;
+  }>({ state: false, key: "" });
 
   const reduceFixlist = (orderid: string) => {
     let old = [...fixList];
@@ -85,10 +90,16 @@ const WaitFix = (props: Props) => {
     setFixList(old);
   };
 
-  const changeClose = () => {
-    let old = { ...popupProps };
-    old.state = false;
-    setPopupProps(old);
+  const changeClose = (type: string) => {
+    if (type === "popup") {
+      let old = { ...popupProps };
+      old.state = false;
+      setPopupProps(old);
+    } else {
+      let old = { ...Fault };
+      old.state = false;
+      setFault(old);
+    }
   };
 
   const columns: ColumnsType<UserInfo> = [
@@ -122,14 +133,25 @@ const WaitFix = (props: Props) => {
       title: "操作",
       key: "action",
       render: (_, record) => (
-        <Space size="middle">
-          <a
-            onClick={() => {
-              checkdetail(record);
-            }}
-          >
-            详情
-          </a>
+        <Space>
+          <Space size="middle">
+            <a
+              onClick={() => {
+                checkdetail(record);
+              }}
+            >
+              详情
+            </a>
+          </Space>
+          <Space size="middle">
+            <a
+              onClick={() => {
+                fillinFaultRason(record);
+              }}
+            >
+              故障报价
+            </a>
+          </Space>
         </Space>
       ),
     },
@@ -139,6 +161,14 @@ const WaitFix = (props: Props) => {
     fixList.forEach((item) => {
       if (item.key === record.key) {
         setPopupProps({ data: item, state: true });
+      }
+    });
+  };
+
+  const fillinFaultRason = (record: UserInfo) => {
+    fixList.forEach((item) => {
+      if (item.key === record.key) {
+        setFault({ state: true, key: record.key });
       }
     });
   };
@@ -159,7 +189,7 @@ const WaitFix = (props: Props) => {
       });
 
   // swr
-  const { error, isLoading } = useSWR(`${HOST}/api/v1/order?state=1`, fetcher);
+  const { error, isLoading } = useSWR(`${HOST}/api/v1/order/?state=2`, fetcher);
 
   if (error) return <div>error</div>;
   if (isLoading) return <div>isLoading</div>;
@@ -176,7 +206,13 @@ const WaitFix = (props: Props) => {
       ) : (
         <></>
       )}
-      <Divider className="title">待维修订单</Divider>
+      {Fault.state ? (
+        <FaultQuotation change={changeClose} order={Fault.key}></FaultQuotation>
+      ) : (
+        <></>
+      )}
+
+      <Divider className="title">维修中订单</Divider>
       <Back></Back>
       <Search
         placeholder="搜索订单"
@@ -190,4 +226,4 @@ const WaitFix = (props: Props) => {
   );
 };
 
-export default WaitFix;
+export default Fixing;

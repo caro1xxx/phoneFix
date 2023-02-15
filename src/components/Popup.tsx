@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
-
+import { Button } from "antd";
+import { DeleteOutlined, ToolOutlined } from "@ant-design/icons";
+import { HOST } from "../ENV";
 const Wrap = styled.div`
   position: absolute;
   background-color: #cecece2f;
@@ -16,6 +18,7 @@ const Wrap = styled.div`
 `;
 
 const Body = styled.div`
+  position: relative;
   background-color: white;
   height: 60vh;
   width: 60vw;
@@ -53,6 +56,12 @@ const Body = styled.div`
   }
 `;
 
+const State = styled.div`
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+`;
+
 type Props = {
   data: {
     key: string;
@@ -68,15 +77,30 @@ type Props = {
     checker: string;
     payway: string;
   } | null;
-  change: () => void;
+  change: (type: string) => void;
+  reduce: (orderid: string) => void;
 };
 
 const Popup = (props: Props) => {
+  const startFix = () => {
+    fetch(`${HOST}/api/v1/fix_change_state/?order=${props.data?.key}`)
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        if (data.code === 200) {
+          props.reduce(props.data?.key || "wx");
+        }
+      });
+  };
+
   return (
     <Wrap>
       <Body>
         <svg
-          onClick={props.change}
+          onClick={() => {
+            props.change("popup");
+          }}
           style={{ position: "absolute", right: "10px", top: "10px" }}
           className="icon close"
           viewBox="0 0 1024 1024"
@@ -155,6 +179,22 @@ const Popup = (props: Props) => {
             </div>
           </div>
         </div>
+        <State>
+          <span style={{ fontSize: "10px", lineHeight: "13px" }}>
+            <div>点击开始维修按钮后,该订单会转移到"维修中",</div>
+            <div>请前往"维修中"填写故障报价</div>
+          </span>
+          <Button type="primary" icon={<ToolOutlined />} onClick={startFix}>
+            开始维修
+          </Button>
+          <Button
+            type="primary"
+            style={{ backgroundColor: "red", marginLeft: "10px" }}
+            icon={<DeleteOutlined />}
+          >
+            删除订单
+          </Button>
+        </State>
       </Body>
     </Wrap>
   );

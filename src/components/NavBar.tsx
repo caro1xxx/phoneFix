@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link, useNavigate } from "react-router-dom";
+import { nanoid } from "nanoid";
 const NavBarWrap = styled.div`
   background-color: white;
   height: calc(100vh);
@@ -324,6 +325,7 @@ const NavBar = (props: Props) => {
           {subMenu.map((item) => {
             return (
               <SubItem
+                key={nanoid()}
                 onClick={() => {
                   quickBtn(item.path);
                 }}
