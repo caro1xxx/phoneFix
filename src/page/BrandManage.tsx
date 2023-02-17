@@ -45,6 +45,13 @@ type model = {
   }[];
 };
 
+type resultList = {
+  model: string;
+  pk: number;
+  fields: { name: string; state: string };
+  showInput: boolean;
+}[];
+
 const BrandManage = (props: Props) => {
   const { token } = theme.useToken();
   const [brandList, setBrandList] = useState<model[]>();
@@ -125,22 +132,29 @@ const BrandManage = (props: Props) => {
   const onCollapseChange = (key: number) => {
     if (!brandList) return;
     let old = [...brandList];
-    old.forEach((item) => {
-      if (item.pk === key) {
-        fetch(`${HOST}/api/v1/brand_model_manage/`, {
-          method: "POST",
-          body: JSON.stringify({ brand: item.fields.name }),
-          headers: { "Content-Type": "applicat ion/json" },
-        })
-          .then((res) => {
-            return res.json();
-          })
-          .then((data) => {
-            item.child = JSON.parse(data.list);
-          });
+    let index: number = 0;
+    for (let i = 0; i < old.length; i++) {
+      if (old[i].pk === key) {
+        index = i;
+        break;
       }
-    });
-    setBrandList(old);
+    }
+    fetch(`${HOST}/api/v1/brand_model_manage/`, {
+      method: "POST",
+      body: JSON.stringify({ brand: old[index].fields.name }),
+      headers: { "Content-Type": "applicat ion/json" },
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        if (data.code === 200) {
+          old[index].child = [];
+          old[index].child.push(...JSON.parse(data.list));
+          console.log(old[index].child);
+          setBrandList(old);
+        }
+      });
   };
 
   // 显示为可编辑
@@ -254,7 +268,8 @@ const BrandManage = (props: Props) => {
   };
 
   // fetcher
-  const fetcher = (url: string) =>
+  const fetcher = (url: string) => {
+    if (brandList) return;
     fetch(url)
       .then((res) => {
         return res.json();
@@ -269,6 +284,7 @@ const BrandManage = (props: Props) => {
         });
         setBrandList(newData);
       });
+  };
 
   // swr
   const { error, isLoading } = useSWR(
@@ -287,8 +303,8 @@ const BrandManage = (props: Props) => {
       <div style={{ marginBottom: "20px" }}></div>
       {brandList.map((item, index) => {
         return (
+          // 该节点不能使用nanoid作为key
           <Collapse
-            key={nanoid()}
             onChange={() => {
               onCollapseChange(item.pk);
             }}

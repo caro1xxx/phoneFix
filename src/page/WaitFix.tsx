@@ -163,7 +163,6 @@ const WaitFix = (props: Props) => {
 
   if (error) return <div>error</div>;
   if (isLoading) return <div>isLoading</div>;
-  if (!fixList) return <div>error1</div>;
 
   return (
     <Wrap>
