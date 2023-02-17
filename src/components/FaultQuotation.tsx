@@ -4,6 +4,7 @@ import { Select, Button, InputNumber } from "antd";
 import { HOST } from "../ENV";
 import { nanoid } from "nanoid";
 import useSWR from "swr";
+
 const Wrap = styled.div`
   position: absolute;
   background-color: #cecece2f;
@@ -66,12 +67,6 @@ interface faultList {
   fields: { name: string; state: boolean };
 }
 
-type faultLI = {
-  value: string;
-  lable: string;
-  disabled: Boolean;
-};
-
 type faultOrderType = {
   pk: number;
   fields: {
@@ -99,7 +94,103 @@ const FaultQuotation = (props: Props) => {
     curentOrderFault: [
       { fixer: "", group: "", name: "", price: 0, warranty: 0 },
     ],
+    currentFixer: "",
+    currentFault: "",
+    price: 0,
+    warranty: 30,
   });
+
+  // 保存该订单故障
+  const saveFaultOrder = () => {
+    if (data.currentFault === "" || data.currentFixer === "") {
+      alert("请填写完整");
+    } else {
+      fetch(`${HOST}/api/v1/submit_fault/`, {
+        method: "post",
+        body: JSON.stringify({
+          fault: data.currentFault,
+          fixer: data.currentFixer,
+          group: props.order,
+          price: data.price,
+          warranty: data.warranty,
+        }),
+        headers: { "Content-Type": "applicat ion/json" },
+      })
+        .then((res) => {
+          return res.json();
+        })
+        .then((d) => {
+          if (d.code === 200) {
+            let old = { ...data };
+            old.curentOrderFault.unshift({
+              fixer: data.currentFixer,
+              group: props.order,
+              name: data.currentFault,
+              price: data.price,
+              warranty: data.warranty,
+            });
+            setData(old);
+          }
+        });
+    }
+  };
+
+  // 删除该订单故障
+  const deleteFaultOrder = (faultName: string) => {
+    fetch(`${HOST}/api/v1/delete_fault_order/`, {
+      method: "post",
+      body: JSON.stringify({
+        fault: faultName,
+        group: props.order,
+      }),
+      headers: { "Content-Type": "applicat ion/json" },
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((d) => {
+        if (d.code === 200) {
+          let old = { ...data };
+          for (let i = 0; i < old.curentOrderFault.length; i++) {
+            if (old.curentOrderFault[i].name === faultName) {
+              old.curentOrderFault.splice(i, 1);
+            }
+          }
+          setData(old);
+        }
+      });
+  };
+
+  // 选择框变化
+  const selectChangeHandle = (value: string, type: string) => {
+    let old = { ...data };
+    switch (type) {
+      case "fault":
+        console.log(value);
+        old.currentFault = value;
+        setData(old);
+        break;
+      case "fixer":
+        old.currentFixer = value;
+        setData(old);
+        break;
+    }
+  };
+
+  // 数值输入框变化
+  const numberInputChangeHandle = (value: number | null, type: string) => {
+    let old = { ...data };
+    switch (type) {
+      case "price":
+        old.price = value as number;
+        setData(old);
+        break;
+      case "warranty":
+        old.warranty = value as number;
+        setData(old);
+        break;
+    }
+  };
 
   // 获取该订单故障列表
   const getFault = () => {
@@ -126,7 +217,8 @@ const FaultQuotation = (props: Props) => {
   };
 
   // fetcher
-  const fetcher = (url: string) =>
+  const fetcher = (url: string) => {
+    if (data.curentOrderFault[0].name !== "") return;
     fetch(url)
       .then((res) => {
         return res.json();
@@ -142,6 +234,7 @@ const FaultQuotation = (props: Props) => {
           setData(old);
         }
       });
+  };
 
   // swr
   const { error, isLoading } = useSWR(
@@ -150,8 +243,6 @@ const FaultQuotation = (props: Props) => {
   );
 
   if (error) return <div>error</div>;
-  // if (isLoading) return <div>isLoading</div>;
-  // if (!user) return <div>error</div>;
 
   return (
     <Wrap>
@@ -191,13 +282,18 @@ const FaultQuotation = (props: Props) => {
             defaultValue="请选择故障"
             className="select"
             style={{ width: 140 }}
-            // onChange={handleUserChange}
+            onChange={(value) => {
+              selectChangeHandle(value, "fault");
+            }}
             onClick={getFault}
             options={fault}
           />
           <Select
             defaultValue="请选择维修员"
             className="select"
+            onChange={(value) => {
+              selectChangeHandle(value, "fixer");
+            }}
             style={{ width: 140 }}
             options={data.fixer}
           />
@@ -205,16 +301,26 @@ const FaultQuotation = (props: Props) => {
             className="select"
             min={0}
             max={10000}
+            onChange={(value) => {
+              numberInputChangeHandle(value, "price");
+            }}
             placeholder="报价"
           />
           <InputNumber
             className="select"
             min={0}
             max={10000}
+            onChange={(value) => {
+              numberInputChangeHandle(value, "warranty");
+            }}
             defaultValue={30}
             placeholder="保修期"
           />
-          <Button type="primary" style={{ margin: "10px", width: "90%" }}>
+          <Button
+            type="primary"
+            onClick={saveFaultOrder}
+            style={{ margin: "10px", width: "90%" }}
+          >
             保存
           </Button>
         </div>
@@ -229,6 +335,9 @@ const FaultQuotation = (props: Props) => {
                   <span>故障:{item.name}</span>
                   <span>报价:{item.price}</span>
                   <span
+                    onClick={() => {
+                      deleteFaultOrder(item.name);
+                    }}
                     style={{
                       textAlign: "end",
                       color: "#1677ff",

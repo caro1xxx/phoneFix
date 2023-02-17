@@ -137,10 +137,10 @@ const BrandManage = (props: Props) => {
           })
           .then((data) => {
             item.child = JSON.parse(data.list);
-            setBrandList(old);
           });
       }
     });
+    setBrandList(old);
   };
 
   // 显示为可编辑

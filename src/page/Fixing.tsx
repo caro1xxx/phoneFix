@@ -6,7 +6,7 @@ import { Space, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { HOST } from "../ENV";
 import useSWR from "swr";
-import Popup from "../components/Popup";
+import FixingPopup from "../components/FixingPopup";
 import FaultQuotation from "../components/FaultQuotation";
 
 const Wrap = styled.div`
@@ -174,7 +174,8 @@ const Fixing = (props: Props) => {
   };
 
   // fetcher
-  const fetcher = (url: string) =>
+  const fetcher = (url: string) => {
+    if (fixList.length >= 1) return;
     fetch(url)
       .then((res) => {
         return res.json();
@@ -187,6 +188,7 @@ const Fixing = (props: Props) => {
         });
         setFixList(old);
       });
+  };
 
   // swr
   const { error, isLoading } = useSWR(`${HOST}/api/v1/order/?state=2`, fetcher);
@@ -198,11 +200,11 @@ const Fixing = (props: Props) => {
   return (
     <Wrap>
       {popupProps.state ? (
-        <Popup
+        <FixingPopup
           data={popupProps.data}
           reduce={reduceFixlist}
           change={changeClose}
-        ></Popup>
+        ></FixingPopup>
       ) : (
         <></>
       )}
